@@ -69,7 +69,7 @@ const Header: React.FC = () => {
           <Link to="/" className="flex items-center space-x-2">
             <a href="/" className="block">
                   <img
-                    src="logo.png"
+                    src="images/logo.png"
                     alt="Haq Logo"
                     className="h-10 w-auto rounded-lg"
                    />
