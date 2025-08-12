@@ -26,9 +26,9 @@ export interface ChatMessage {
   text: string;
   isUser: boolean;
   timestamp: Date;
-  category?: string;
-  legalClause?: string;
-  recommendation?: string;
+  category?: string | null;
+  legalClause?: string | null;
+  recommendation?: string | null;
 }
 
 export interface EmergencyContact {

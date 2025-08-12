@@ -29,36 +29,52 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const simulateAIResponse = (userMessage: string): ChatMessage => {
-    const responses = [
-      {
-        text: "I understand you're facing a difficult situation. Based on what you've described, this may involve violations of your workplace rights under the Protection of Women Against Harassment Act 2010. Let me explain your options...",
-        category: "Workplace Rights",
-        legalClause: "Protection of Women Against Harassment Act 2010, Section 4",
-        recommendation: "1. Document the incidents 2. Report to management 3. File complaint with Ombudsman if needed"
-      },
-      {
-        text: "This sounds like it relates to your matrimonial rights. According to Pakistani law, you have specific rights regarding your Nikah Nama and maintenance. Would you like me to explain these in detail?",
-        category: "Marriage Rights",
-        legalClause: "Muslim Family Laws Ordinance 1961",
-        recommendation: "Review your Nikah Nama terms and consult with a family law expert"
-      }
-    ];
+  const fetchAIResponse = async (userMessage: string): Promise<ChatMessage> => {
+    try {
+      const response = await fetch('https://herhaq-backend-5v79.onrender.com/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          language: language
+        }),
+      });
 
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    
-    return {
-      id: Date.now().toString(),
-      text: randomResponse.text,
-      isUser: false,
-      timestamp: new Date(),
-      category: randomResponse.category,
-      legalClause: randomResponse.legalClause,
-      recommendation: randomResponse.recommendation
-    };
+      if (!response.ok) {
+        throw new Error('Failed to fetch response from server');
+      }
+
+      const data = await response.json();
+      
+      return {
+        id: Date.now().toString(),
+        text: data.response || data.message || "I'm here to help you with your legal questions.",
+        isUser: false,
+        timestamp: new Date(),
+        category: data.category || "General Legal Advice",
+        legalClause: data.legal_clause || null,
+        recommendation: data.recommendation || null
+      };
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+      
+      return {
+        id: Date.now().toString(),
+        text: language === 'en' 
+          ? "I'm having trouble connecting to the server. Please try again in a moment."
+          : "مجھے سرور سے رابطہ کرنے میں دشواری ہو رہی ہے۔ براہ کرم کچھ دیر بعد دوبارہ کوشش کریں۔",
+        isUser: false,
+        timestamp: new Date(),
+        category: "Error",
+        legalClause: null,
+        recommendation: null
+      };
+    }
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
 
     const userMessage: ChatMessage = {
@@ -72,12 +88,14 @@ const Chat: React.FC = () => {
     setInputText('');
     setIsLoading(true);
 
-    // Simulate AI processing time
-    setTimeout(() => {
-      const aiResponse = simulateAIResponse(inputText);
+    try {
+      const aiResponse = await fetchAIResponse(inputText);
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Error in sendMessage:', error);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const toggleVoiceRecording = () => {
