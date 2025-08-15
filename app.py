@@ -3,7 +3,16 @@ from flask_cors import CORS
 import os
 
 app = Flask(__name__)
-CORS(app, origins=['https://www.herhaq.org', 'http://localhost:3000', 'http://localhost:5173'])
+CORS(app, origins=[
+    'https://www.herhaq.org',
+    'https://herhaq.org',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'https://herhaq-frontend.onrender.com',
+    'https://herhaq.netlify.app',
+    'https://herhaq.vercel.app'
+])
 
 @app.route('/api/chat', methods=['POST', 'OPTIONS'])
 def chat():
